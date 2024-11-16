@@ -47,24 +47,31 @@ namespace TraversalApi.Controllers
                 }
             }
         }
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public IActionResult VisitorDelete(int id)
         {
-            using (var context = new VisitorContext())
+            try
             {
-                var value = context.Visitors.Find(id);
-                if (value == null)
+                using (var context = new VisitorContext())
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    context.Remove(value);
-                    context.SaveChanges() ;
-                    return Ok();
+                    var visitor = context.Visitors.Find(id);
+                    if (visitor == null)
+                    {
+                        return NotFound(new { message = "Ziyaretçi bulunamadı." });
+                    }
+
+                    context.Visitors.Remove(visitor);
+                    context.SaveChanges();
+                    return Ok(new { message = "Ziyaretçi başarıyla silindi." });
                 }
             }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Silme işlemi sırasında bir hata oluştu: {ex.Message}" });
+            }
         }
+
+
         [HttpPut]
         public IActionResult UpdateVisitor(Visitor visitor)
         {
